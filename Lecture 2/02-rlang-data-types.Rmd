@@ -928,6 +928,17 @@ To run a specific demo, just tell R which one and the name of the parent package
 demo("graphics", package = "graphics")
 ```
 
+
+---
+
+class: inverse, center, middle
+
+# Next lecture(s): Objects and the OOP approach
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+
+
 ```{r gen_pdf, include = FALSE, cache = FALSE, eval = TRUE}
 infile = list.files(pattern = '.html')
 pagedown::chrome_print(input = infile, timeout = 100)
