@@ -1,4 +1,5 @@
 base
+xaringanthemer
 knitr
 tidyverse
 ggplot2
@@ -14,5 +15,4 @@ fontawesome
 gapminder
 pacman
 gganimate
-xaringanthemer
 magick
