@@ -65,11 +65,11 @@ name: intro
 
 # Agenda
 
-Today and the next lecture are going to be very hands on. 
+Today will be more high level than the last few lectures.
 
-- I'll have slides as per usual, but we're going to spent a lot of time live coding together.
+- While there will be some coding, this will mostly be solidifying and clarifying certain concepts.
 
-This is deliberate. 
+I want everyone to feel comfortable in RStudio and to understand how to make scripts and RMarkdown documents.
 
 - I want you to get comfortable typing R commands yourself — and navigating the RStudio IDE — without resorting to copy+paste.
 - Slightly more painful in the beginning, but much better payoff in the long-run.
@@ -87,7 +87,7 @@ name: oop
 
 # Motivation
 
-In our very first lecture, I mentioned R's approach to [object-oriented programming](https://en.wikipedia.org/wiki/Object-oriented_programming) (OOP), which is often summarised as:
+In our very first lecture, I mentioned R's approach to [object-oriented programming](https://en.wikipedia.org/wiki/Object-oriented_programming) (OOP), which is often summarized as:
 
 > **"Everything is an object and everything has a name."**
 
