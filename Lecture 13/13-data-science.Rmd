@@ -1,0 +1,318 @@
+---
+title: "Data Science for Economists"
+# subtitle: "<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>"
+subtitle: "Lecture 13: Intro to Data Science"
+author: "Alex Marsh"
+date: "University of North Carolina | [ECON 390](https://github.com/alexiom/ECON390)" #"`r format(Sys.time(), '%d %B %Y')`"
+output:
+  xaringan::moon_reader:
+    css: [default, metropolis, metropolis-fonts] 
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+style_mono_accent(
+  base_color = "#4B9CD3",
+  header_font_google = google_font("Fira Sans","600"),
+  text_font_google   = google_font("Fira Sans", "300", "300i"),
+  base_font_size = "20px",
+  text_font_size = "0.9rem",
+  code_inline_font_size = "0.9em",
+  code_font_size = "0.7rem",
+  header_h1_font_size = "2.0rem",
+  header_h2_font_size = "1.75rem",
+  header_h3_font_size = "1.25rem",
+  code_font_google   = google_font("Fira Code"),
+  inverse_link_color = "#13294B",
+  link_color = "#4B9CD3"
+)
+data(mtcars)
+```
+
+
+```{css, echo=FALSE}
+# CSS for including pauses in printed PDF output (see bottom of lecture)
+@media print {
+  .has-continuation {
+    display: block !important;
+  }
+}
+```
+
+```{r setup, include=FALSE}
+# xaringanExtra::use_scribble() ## Draw on slides. Requires dev version of xaringanExtra.
+
+options(htmltools.dir.version = FALSE)
+library(knitr)
+opts_chunk$set(
+  fig.align="center",  
+  fig.height=4, #fig.width=6,
+  # out.width="748px", #out.length="520.75px",
+  dpi=300, #fig.path='Figs/',
+  cache=T#, echo=F, warning=F, message=F
+  )
+library(tidyverse)
+library(hrbrthemes)
+library(fontawesome)
+```
+
+
+# Table of contents
+
+1. [Introduction](#intro)
+
+2. [What is data science?](#datascience)
+
+3. [What do data scientists do?](#whatdo)
+
+4. [Modeling](#modeling)
+
+5. [What do economists bring?](#economists)
+
+---
+class: inverse, center, middle
+name: intro
+
+# Introduction
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+# Motivation
+
+We've spent most the class learning R and becoming competent in programming. 
+
+Now, we are finally going to touch on the world of data science and the things that R can be used for. 
+
+Remember that 
+
+---
+class: inverse, center, middle
+name: datascience
+
+# What Is Data Science?
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+# What is data science?
+
+Data science is a relatively new "field" that is still evolving.
+
+--
+
+Wikipedia's definition:
+
+> Data science is an interdisciplinary field that uses scientific methods, processes, algorithms and systems to extract knowledge and insights from noisy, structured and unstructured data, and apply knowledge and actionable insights from data across a broad range of application domains. Data science is related to data mining, machine learning and big data.
+
+--
+
+Another definition:
+
+> Data Scientist (n.): Person who is better at statistics than any software engineer and better at software engineering than any statistician. - [Josh Wills](https://twitter.com/josh_wills)
+
+--
+
+Anyone can be a data scientist!
+- Economist have a special toolkit that is more important for data science than ever.
+
+---
+class: inverse, center, middle
+name: whatdo
+
+# What do data scientists do?
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+# What do data scientist do?
+
+1. Data mining: extracting, wrangling, and storing large amounts of data. 
+
+2. Modeling: applying models and ideas from both statistical/machine learning and traiditonal statistics to build algorithms to do things too difficult for humans.
+
+3. Software/website development: some data scientist will take the data, algorithms, and insights they develop and integrated them into software or websites.
+
+--
+
+There are lots of buzzwords in this area. It is important to see through this and not get intimidated. 
+
+--
+
+We've already spent a bit of time talking about data wrangling.
+- There's lots more to learn (e.g. webscraping), but we have limited time.
+
+Let's talking about the modeling side.
+
+---
+# What do data scientist do?
+
+![](pics/DataScientistDo.jpg)
+---
+class: inverse, center, middle
+name: model
+
+# Modeling
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+# Statistics vs Machine Learning
+
+One of the most confusing thing more many people is understanding the difference between machine learning and traditional statistics.
+
+In truth, there isn't much of a difference and there's *lots* of overlap between the two.
+- E.g. Ridge and LASSO regression are used in both and many statistical learning algorithms are just nonparametric statistics.
+
+The big difference comes down to philosophical differences and objects of interest.
+
+Suppose you have a traditional linear model: $$y_i = x_i \beta + \varepsilon_i$$
+
+- Statisticians will care about getting an estimate for $\beta$, called $\hat{\beta}$
+ - Ideally, $\hat{\beta}$ will have desirable properties.
+- Machine learning cares about getting accurate and "precise" estimates of $y_i$, called $\hat{y}_i$
+
+This difference comes down to inference of $\hat{\beta}$ versus prediction of $\hat{y}_i$.
+
+---
+# Inference vs Prediction
+
+With $\hat{\beta}$, we want to infer its value using an "estimator."
+
+Ideally, this estimator will have nice properties like unbiased.
+
+However, there is a bias-variance trade-off. 
+
+--
+
+$$\text{MSE}(\hat{\beta}) = E[(\hat{\beta}- \beta)^2]$$
+$$ = E[\beta^2 + \hat{\beta}^2 - 2\beta\hat{\beta}]=\beta^2 + E[\hat{\beta}^2] - 2\beta E[\hat{\beta}]$$
+$$ = \beta^2 + E[\hat{\beta}^2] - 2\beta E[\hat{\beta}] + E[\hat{\beta}]^2-E[\hat{\beta}]^2$$
+$$ = E[\hat{\beta}]^2+\beta^2 - 2\beta E[\hat{\beta}] + E[\hat{\beta}^2]  -E[\hat{\beta}]^2$$
+$$ = (E[\hat{\beta}]-\beta)^2  + E[\hat{\beta}^2]-E[\hat{\beta}]^2$$
+$$ = Bias(\hat{\beta},\beta)^2  + Var(\hat{\beta})$$
+
+--
+
+If you're willing to accept some bias, you can decrease the variance of the estimator.
+
+---
+# Inference vs Prediction (cont.)
+
+![](pics/ridge_meme.jpeg)
+
+---
+
+# Inference vs Prediction (cont.)
+
+Prediction Problems:
+1. How much will this ad campaign increase revenue?
+2. What will traffic on the website be tomorrow?
+3. Is this tweet harmful and should it be flagged?
+4. What will the price of a home be in a year?
+
+Inference Problems:
+1. Will this ad campaign have a causal impact on revenue?
+2. Does education have a causal effect on wages?
+3. Will changing the Twitter UI cause people to spend more time on the site?
+4. What is the causal effect of renovating a kitchen on a home price?
+
+--
+
+For more on the difference, check out [this blog post](https://ryxcommar.com/2019/07/14/on-moving-from-statistics-to-machine-learning-the-final-stage-of-grief/) by r y x, r 
+
+---
+# Types of Learning
+
+- Supervised Learning:
+ - You have a target variable ("dependent variable") and you would like to learn from function of the features ("independent variables") that explains the target.
+
+--
+- Unsupervised Learning:
+ - We observe $X$, but not $y$. While we can't use traditional statistical models, we can still do things like "clustering," classify observations of $X$ based on similarity.
+
+--
+ 
+There are two main types of supervised learning:
+
+1\. Regression: the target variable, $y$, is continuous and you want to learn a function $f$ of the features $X$ where $y = f(X)+\varepsilon$ where $\varepsilon$ is some error term.
+- If $\hat{f}$ is your estimate of $f$ (or "learned function"), then the prediction of $y$, called $\hat{y}$ is $\hat{y} = \hat{f}(X)$
+
+--
+
+2\. Classification: the target variable $y$ is a category (e.g. $y =$ freshman, sophomore, junior, senior) and you want to learn $P(Y=y | X)$ so if you're given a new observation of $X$, you can predict which group it belongs to.
+
+---
+# Types of Learning (cont.)
+
+Below are some examples of each type you may have heard of.
+
+- Regression\*: linear regression, Ridge regression, LASSO regression.
+- Classification: logistic regression, K-nearest neighbors.
+- Unsupervised learning: K-means.
+
+--
+
+\* Don't confuse regression in the learning sense with regression in the statistical sense. While they are similar and have the same name, they are different. When we say linear regression, we are referring to estimating a condition mean $E[y|X]$ with a linear model. Regression in machine learning is any model where $y$ is continuous regardless of what's being estimated.
+
+---
+class: inverse, center, middle
+name: economists
+
+# What do economists have to bring?
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+
+---
+# What do economists have to bring?
+
+As economists, we bring a lot of unique tools to the world of data science.
+
+--
+
+Our specialty is being able to think carefully about observational data to obtain causal effects or "counterfactuals."
+
+--
+
+This is where the idea of the "data generating process" comes in handy. How did the data come to us? What economic choices affect how we observe the data? 
+
+--
+
+The Nobel (Memorial) Prize in Economics was award to Angrist, Imbens, and Card in part for their work on developing ideas an econometric framework to think about causal questions seriously.
+
+--
+
+In fact, Twitter Engineering ([@TwitterEng](https://twitter.com/TwitterEng)) created a [tweet thread about how Angrist's and Imbens's work have influenced their work at Twitter](https://twitter.com/TwitterEng/status/1450179475426066433?s=20) that is worth a read.
+
+--
+
+Econometricians have contributed to the field of machien learning; see [Athey et. al (2019)](https://arxiv.org/abs/1610.01271), [Athey and Imbens (2016)](https://www.pnas.org/content/113/27/7353), [Nekipelov et. al. (2021)](https://cpb-us-w2.wpmucdn.com/sites.wustl.edu/dist/5/501/files/2016/10/momentTrees.pdf), just to name a few.
+
+---
+# What do economists have to bring?
+
+
+Many of the issues we face in economics are the same issues data scientists are finding cause problems with their models. 
+- If you train an algorithm for resumes on only white men, what do you think the algorithm will do when it gets a resume from someone not white or male?
+
+- The types of people who select into using Twitter are likely different than those who don't use Twitter. How/when should Twitter keep this in might when training their algorithms?
+
+- How does racial bias in incarnation rates affect algorithms used to recommend probation or sentencing? (Yes, these exist.)
+
+- How does endogeneity in credit/financial history affect the credit scores assigned to individuals?
+
+---
+class: inverse, center, middle
+
+# Next lecture: Unsupervised Learning
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+
+```{r gen_pdf, include = FALSE, cache = FALSE, eval = TRUE}
+infile = list.files(pattern = '.html')
+pagedown::chrome_print(input = infile, timeout = 100)
+```

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Data Science for Economists</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Alex Marsh" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Data Science for Economists
+## Lecture 6: Functions
+### Alex Marsh
+### University of North Carolina | <a href="https://github.com/alexiom/ECON390">ECON 390</a>
+
+---
+
+name: toc
+
+&lt;style type="text/css"&gt;
+@media print {
+  .has-continuation {
+    display: block !important;
+  }
+}
+&lt;/style&gt;
+
+
+
+# Table of contents
+
+1. [Introduction](#intro)
+
+2. [Functions](#functions)
+
+---
+class: inverse, center, middle
+name: intro
+
+# Introduction
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+# Agenda
+
+Today we will finally officially cover functions.
+
+While we have already used and talked about them quite a lot, there are a few quirks that we should go over along with learning how to write our own. 
+
+---
+class: inverse, center, middle
+name: functions
+
+# Functions
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+# What is a function
+
+Functions in programming are just like functions in math: they take in inputs and return a unique output.
+
+Functions allow you to put code that you use frequently into a single line.
+
+&gt; You should consider writing a function whenever you’ve copied and pasted a block of code more than twice (i.e. you now have three copies of the same code).
+
+*R for Data Science*
+
+Using functions appropriately makes for much cleaner code and code with fewer errors. 
+
+Functions are verbs; arguments are nouns.
+
+---
+# A Trivial Function
+
+
+```r
+return_input = function(x){
+  x #return the input as output
+}
+
+return_input(1)
+```
+
+```
+## [1] 1
+```
+
+```r
+return_input(letters)
+```
+
+```
+##  [1] "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s"
+## [20] "t" "u" "v" "w" "x" "y" "z"
+```
+
+```r
+return_input = function(x){
+  return(x) #this is equivalent
+}
+
+return_input(1)
+```
+
+```
+## [1] 1
+```
+
+---
+# Pythagorean Theorem
+
+
+```r
+hypotenuse = function(a,b){
+  sqrt(a^2+b^2)
+}
+hypotenuse(3,4)
+```
+
+```
+## [1] 5
+```
+
+```r
+hypotenuse(1:5,2:6)
+```
+
+```
+## [1] 2.236068 3.605551 5.000000 6.403124 7.810250
+```
+
+```r
+hypotenuse(3,1:5)
+```
+
+```
+## [1] 3.162278 3.605551 4.242641 5.000000 5.830952
+```
+
+```r
+hypotenuse(3:5,1:5) #don't do this
+```
+
+```
+## Warning in a^2 + b^2: longer object length is not a multiple of shorter object
+## length
+```
+
+```
+## [1] 3.162278 4.472136 5.830952 5.000000 6.403124
+```
+
+---
+# A Weighted Mean
+
+
+```r
+wt_mean = function(x,w){
+  sum(x*w)/sum(w)
+}
+wts = runif(20)
+wt_mean(1:20,wts)
+```
+
+```
+## [1] 10.07217
+```
+
+```r
+wt_mean = function(x,w){
+  if(length(x)!=length(w)){
+    stop("x and w must be the same length")
+  }
+  sum(x*w)/sum(w)
+}
+
+wt_mean(1:20,wts[-1])
+```
+
+```
+## Error in wt_mean(1:20, wts[-1]): x and w must be the same length
+```
+
+```r
+wt_mean(w = wts, x=1:20)
+```
+
+```
+## [1] 10.07217
+```
+---
+# Default Arguments 
+
+In `R` you can define default arguments for functions. Typically you do this if there's a value that is used often and you don't want to always pass it to the function.
+
+We've already seen one example of default arguments:
+
+
+```r
+rnorm(1)
+```
+
+```
+## [1] 1.224082
+```
+
+```r
+rnorm(1,mean=0,sd=1)
+```
+
+```
+## [1] 0.3598138
+```
+
+To define a default argument, simply add it to the list of arguments with an equal sign and the default value.
+
+
+```r
+test_fun = function(x, y=2){
+  x+y
+}
+test_fun(3)
+```
+
+```
+## [1] 5
+```
+---
+# Defaul Arguments
+
+
+```r
+normalize = function(x, m = mean(x,na.rm=na.rm),s = sd(x,na.rm=na.rm),na.rm=FALSE){
+  (x - m)/s
+}
+normalize(1:10)
+```
+
+```
+##  [1] -1.4863011 -1.1560120 -0.8257228 -0.4954337 -0.1651446  0.1651446
+##  [7]  0.4954337  0.8257228  1.1560120  1.4863011
+```
+
+```r
+normalize(c(1:10,NA))
+```
+
+```
+##  [1] NA NA NA NA NA NA NA NA NA NA NA
+```
+
+```r
+normalize(c(1:10,NA),na.rm=TRUE)
+```
+
+```
+##  [1] -1.4863011 -1.1560120 -0.8257228 -0.4954337 -0.1651446  0.1651446
+##  [7]  0.4954337  0.8257228  1.1560120  1.4863011         NA
+```
+
+---
+# Writing Functions: Good Style
+
+The following are some recommendations for good programming style with functions:
+
+1. Name your functions something descriptive.
+ - Remember, they are verbs!
+2. Try to foresee errors and incorrect inputs to your functions and program in errors and warnings.
+ - This is less important if your functions are only for you. 
+3. Comment, comment comment!
+4. If you write a "family" of functions, try to use similar naming schemes.
+5. Scope....
+---
+# Scope
+
+I've referred to the global environment a lot throughout lectures. In terms of scope, it is the most general. 
+
+--
+
+However, the environment within a function is a separate, more specific environment. Understanding this difference is important.
+
+--
+
+Variables in the global environment can be referred to in `R` but variables in a function environment that are not returned *will not* be saved in the global environment. 
+
+--
+
+It is generally frowned upon to refer to too many global variables within functions (not by me, though <svg aria-hidden="true" role="img" viewBox="0 0 496 512" style="height:1em;width:0.97em;vertical-align:-0.125em;margin-left:auto;margin-right:auto;font-size:inherit;fill:currentColor;overflow:visible;position:relative;"><path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm24 199.4c3.3-42.1 32.2-71.4 56-71.4s52.7 29.3 56 71.4c.7 8.6-10.8 11.9-14.9 4.5l-9.5-17c-7.7-13.7-19.2-21.6-31.5-21.6s-23.8 7.9-31.5 21.6l-9.5 17c-4.2 7.4-15.8 4.1-15.1-4.5zm-160 0c3.3-42.1 32.2-71.4 56-71.4s52.7 29.3 56 71.4c.7 8.6-10.8 11.9-14.9 4.5l-9.5-17c-7.7-13.7-19.2-21.6-31.5-21.6s-23.8 7.9-31.5 21.6l-9.5 17c-4.3 7.4-15.8 4-15.1-4.5zM398.9 306C390 377 329.4 432 256 432h-16c-73.4 0-134-55-142.9-126-1.2-9.5 6.3-18 15.9-18h270c9.6 0 17.1 8.4 15.9 18z"/></svg>)
+ - There are legitimate reasons, I just have a bad habit. 
+ 
+--
+ 
+Let's see some examples.
+
+---
+# Scope Examples
+
+
+```r
+y = 2
+add_xy = function(x){
+  x + y
+}
+add_xy(3)
+```
+
+```
+## [1] 5
+```
+
+```r
+my_mean = function(x){
+  x_sum = sum(x)
+  x_sum/length(x)
+}
+my_mean(1:10)
+```
+
+```
+## [1] 5.5
+```
+
+```r
+x_sum
+```
+
+```
+## Error in eval(expr, envir, enclos): object 'x_sum' not found
+```
+
+---
+# Advice Regarding Scope
+
+- Variables that are unlikely to change throughout a script are safe to be created and referred to as "global variables."
+ - e.g. `\(N\_sim\)` in a simulation exercise.
+- When writing functions, only refer to variables in the global environment that meet the requirements described above. Relying on globals too much is sloppy programming.
+- However, writing functions with too many arguments is also bad programming. You have to find a balance.
+- There are ways to save variables created in a function to the global environment (look up &lt;&lt;-). I would generally avoid these. They can get you into trouble.
+ - If you want to return multiple objects, make a list!!
+
+---
+# Returning vs Printing
+
+I have hinted at the difference between returning an object and printing an object before. 
+
+This distinction matters the most for functions.
+
+When you return an object from a function, that is the only thing that can be returned.
+
+When you print an object, it shows output but does not return the object from the function unless you also specify it to print.
+
+The best thing I can say to understand the difference is that printing is for you and returning is for the computer!
+
+Let's look at some examples.
+
+---
+# Returning vs Printing
+
+
+```r
+plus_delta = function(x,delta=1){
+  print(paste0("We are adding ", delta, " to ", x, "!"))
+  x + delta
+}
+
+plus_delta(5)
+```
+
+```
+## [1] "We are adding 1 to 5!"
+```
+
+```
+## [1] 6
+```
+
+```r
+plus_delta(4.5,0.75)
+```
+
+```
+## [1] "We are adding 0.75 to 4.5!"
+```
+
+```
+## [1] 5.25
+```
+---
+# Returning vs Printing
+
+```r
+mult_plus1 = function(x,y){
+  xy = x*y
+  print(xy)
+  xy+1
+}
+
+mult_plus1(2,3)
+```
+
+```
+## [1] 6
+```
+
+```
+## [1] 7
+```
+
+```r
+xy
+```
+
+```
+## Error in eval(expr, envir, enclos): object 'xy' not found
+```
+
+```r
+out1 = mult_plus1(2,3)
+```
+
+```
+## [1] 6
+```
+
+```r
+out1
+```
+
+```
+## [1] 7
+```
+
+---
+# Misc Aspects of Functions
+
+Functions don't have to have arguments.
+
+Functions don't have to return an object.
+
+Functions can only return one object; however, if you're using if statements, there might be multiple returns specified. It's just ultimately only one will be used.
+
+You can write functions to take an arbitrary number of inputs using `...` notation.
+
+---
+# No arguments or Returns
+
+
+```r
+say_hello = function(){
+  print("Hello! :)")
+} #notice, nothing is being returned either!!
+
+say_hello()
+```
+
+```
+## [1] "Hello! :)"
+```
+
+```r
+say_my_name = function(name){
+  print(name)
+}
+
+say_my_name("Alex")
+```
+
+```
+## [1] "Alex"
+```
+
+---
+# Conditional Returns
+
+
+```r
+is_prime = function(x){
+  num_vec    = 3:x
+  prime_list = c(2)
+  i          = 1
+  for(n in num_vec){
+    if(sum((n %% prime_list) == 0) == 0){
+      i             = i + 1
+      prime_list[i] = n
+    }
+  }
+  if(x %in% prime_list){
+    return(TRUE)
+  }else{
+    return(FALSE)
+  }}
+
+primes2to20 = sapply(2:20,is_prime)
+names(primes2to20) = 2:20
+primes2to20
+```
+
+```
+##     2     3     4     5     6     7     8     9    10    11    12    13    14 
+##  TRUE  TRUE FALSE  TRUE FALSE  TRUE FALSE FALSE FALSE  TRUE FALSE  TRUE FALSE 
+##    15    16    17    18    19    20 
+## FALSE FALSE  TRUE FALSE  TRUE FALSE
+```
+---
+# Arbitrary Inputs
+
+
+```r
+commas = function(...){
+  out = paste(...,sep = ", ")
+  out
+}
+
+commas("red","blue", "yellow","green")
+```
+
+```
+## [1] "red, blue, yellow, green"
+```
+
+
+---
+class: inverse, center, middle
+
+# Next lecture(s): Misc.
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

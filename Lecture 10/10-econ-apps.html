@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Data Science for Economists</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Alex Marsh" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css/metropolis-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Data Science for Economists
+## Lecture 10: Econ Applications of Numerical Methods
+### Alex Marsh
+### University of North Carolina | <a href="https://github.com/alexiom/ECON390">ECON 390</a>
+
+---
+
+name: toc
+
+&lt;style type="text/css"&gt;
+@media print {
+  .has-continuation {
+    display: block !important;
+  }
+}
+&lt;/style&gt;
+
+
+
+# Table of contents
+
+1. [Introduction](#introduction)
+
+2. [Linear Regression](#OLS)
+
+3. [Supply and Demand Oligopoly](#Berry)
+
+---
+class: inverse, center, middle
+name: introduction
+
+# Introduction
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+
+# Agenda
+
+Today will be an easy lecture that shows y'all some applications of the numerical methods we just learned.
+
+The actual lecture slides will be short as we will spend most of the day programming.
+
+---
+class: inverse, center, middle
+name: OLS
+
+# Linear Regression
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+---
+# Linear Regression
+
+- As you may have already seen, many times in economics, we have a dependent variable `\((y_i)_{i=1}^{n}\)` and indepedent variables `\((x_{1i},x_{2i},...,x_{ki})_{i=1}^{n}\)` that we would like to relate.
+- Specifically, we want to estimate `\(E[y_i | X_i]\)` where `\(X_i = (x_{1i},x_{2i},...,x_{Ki})_{i=1}^{n}\)`.
+- We do this by assuming a "linear model" and estimating the equation of a line `$$y_i = \alpha + \beta_1 x_{1i}+...+\beta_K x_{1k}+\varepsilon_i$$`
+- `\(y_i\)` and `\(X_i\)` are data we observe; `\(\alpha\)` and `\((\beta_k)_{k=1}^{K}\)` are parameters we would like to estimate.
+--
+
+- What's `\(\varepsilon_i\)`?
+
+--
+
+- Note: `\(\varepsilon_i = y_i - \alpha - \beta_1 x_{1i}-...-\beta_K x_{1k}\)`
+- Idea: we can estimate the parameters by choosing `\(\theta = (\alpha,\beta_1,...,\beta_K)\)` such that we minimize `$$\sum_{i=1}^{N} \varepsilon_i^2$$`
+---
+# Linear Regression
+
+![](pics/linear_reg.png)
+---
+# Linear Regression
+
+- Notation: 
+ - For the true values of `\(\theta\)`, we say `\(\varepsilon_i\)` is the unobserved error term.
+ - When we estimate the values of `\(\theta\)`, we typically put "hats" on them to indicate estimates `\(\hat{\theta}\)`. Likewise with the error term.
+ - We call `\(\hat{\varepsilon_i}\)` the "residual"
+ - Error term is population; residual is sample.
+ 
+- So to estimate `\(\theta\)`, we would like to solve the problem `$$\min_{\theta} \sum_{i=1}^{N}\hat{\varepsilon}_i (\theta)^2$$`
+- Note: `\(\hat{\varepsilon}_i (\theta) = y_i -  \hat{\alpha}-\hat{\beta}_1 x_{1i}-...-\beta_K x_{1K}\)`
+- While this problem has a "closed-form" solution, we can use the numerical methods we talked about in last class.
+- Let's go to R!
+
+---
+class: inverse, center, middle
+name: Berry
+
+# Supply and Demand Oligopoly
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+# Demand: Oligopoly
+
+- I will be leaving a lot of details out.
+- Suppose we have `\(K\)` products all produced by a different firm.
+- Suppose consumers get the following utility from product `\(k\)`: `$$u_{ik} = \beta_0 + \beta_x x_k - \alpha p_k + \xi_k + \varepsilon_{ik}$$`
+- We say consumers will select one of the `\(K\)` products that maximizes their utility (with the option of not buying anything at all).
+- Without getting into details, we say that the market share for each product will have the following expression `$$s_k = \frac{e^{u_k}}{1+\sum_{j=1}^{K}e^{u_j}}$$`
+where `\(u_{k} = \beta_0 + \beta_x x_k - \alpha p_k + \xi_k\)`
+- We say the market share is the "demand."
+---
+# Supply: Oligopoly
+
+- On the supply side, we say firms set price to compete with each other to maximize profits:
+`$$\max_{p} \pi_k(p) = s_k(p)p - s_k(p)c_k$$`
+where `\(c_k\)` is a constant marginal cost of production.
+- From a game theory model, we can derive an optimal price setting formula `$$p_k = \frac{1}{\alpha (1-s_k(p_k))}+ c_k$$`
+ - Reminder: in perfect competition `\(p_k = c_k\)`.
+- Note that the market share (demand) shows up in the pricing formula.
+- If we wanted to simulate this model, we would need to solve for equilibrium prices as demand depends on prices `\(s_k(p)\)` and prices depend on demand `\(p_k (s)\)`. 
+- We need to solve a fixed point where `\(p_k(s_k(p^*)) = p^*\)`
+- To R for an example!
+
+---
+class: inverse, center, middle
+
+# Up Next: Data Wrangling
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#EB811B' size=1px width=796px&gt;&lt;/html&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

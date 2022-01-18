@@ -1,0 +1,538 @@
+---
+title: "Data Science for Economists"
+# subtitle: "<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>"
+subtitle: "Lecture 9: Intro to Numerical Methods"
+author: "Alex Marsh"
+date: "University of North Carolina | [ECON 390](https://github.com/alexiom/ECON390)" #"`r format(Sys.time(), '%d %B %Y')`"
+header-includes: 
+  - \usepackage{amsmath}
+output:
+  xaringan::moon_reader:
+    css: [default, metropolis, metropolis-fonts] 
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+
+---
+name: toc
+
+```{css, echo=FALSE}
+@media print {
+  .has-continuation {
+    display: block !important;
+  }
+}
+```
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+library(knitr)
+opts_chunk$set(
+  fig.align="center",  
+  fig.height=4, #fig.width=6,
+  # out.width="748px", #out.length="520.75px",
+  dpi=300, #fig.path='Figs/',
+  cache=F#, echo=F, warning=F, message=F
+  )
+library(data.table)
+library(ggplot2)
+```
+
+# Table of contents
+
+1. [Introduction](#introduction)
+
+2. [Math and Stat Review](#review)
+
+3. [Intro to Nunmerical Methods](#num methods)
+
+---
+class: inverse, center, middle
+name: prologue
+
+# Introduction
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+
+
+# Agenda
+
+Today we will cover numerical methods and optimization.
+
+This lecture might be a bit more theory heavy than programming heavy. 
+
+What is important here is to understand the concepts rather than the details.
+
+- Unless you specialize in computational methods for economics later on, you will likely not need to understand the details.
+
+---
+# Motivation
+
+- There are many times there is an equation we would like to solve or know the value of.
+- While ideally, we would solve these analytically to get an exact solution, for any non-trivial problem, this is either incredibly tedious or not possible.
+- Today we will cover a handful of methods that you might need at some point.
+- While some topics will relate within this lecture, most likely, they will feel disjoint and spattered.
+- Understand that I am teaching a handful of tools that you will likely need at some point.
+
+---
+class: inverse, center, middle
+name: intro
+
+# Introduction
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+---
+
+class: inverse, center, middle
+name: review
+
+# Review
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+(Some important math and stat concepts)
+
+---
+# Math Review: Derivative
+
+- The derivative of a function tells you about it's rate of change.
+ - "Instantaneous slope" (this is actually nonsensical the more one thinks about it)
+- We denote the derivative of $f$ with respect to $x$ a few different ways:
+ - $f'(x)$
+ - $\frac{df}{dx}$
+- The derivative tells us more than just the slope:
+ - $f'(x)>0 \rightarrow$ function is increasing 
+ - $f'(x)<0 \rightarrow$ function is decreasing 
+ - $f'(x)=0 \rightarrow$ function is not changing i.e. "critical point" 
+- The formal definition of a derivative is as follows:
+$$f'(x)=\lim_{h\rightarrow 0}\frac{f(x+h)-f(x)}{h}$$
+- We will actually be using this definition!
+
+
+---
+# Math Review: Integrals
+
+- Integrals calculate the area "under the curve"
+- More broadly, they are used when you want to "sum up" a lot of very small things or take the average value of some function.
+- The formal definition of the integral is $$\int_{a}^{b}f(x)dx = \lim_{n\rightarrow \infty} \sum_{i=1}^{n}f(x_i) \Delta x$$ 
+where $a\leq x_1 < x_2 < ...< x_n\leq b$ and $x_{i+1}-x_{i}=\Delta x = (b-a)/n$
+- We will be using this definition!
+
+---
+class: inverse, center, middle
+name: num methods
+
+# Intro to Numerical Methods
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+
+---
+# Approximating Derivatives
+
+- While getting the analytical expression for $f'(x)$ is ideal due to accuracy and computational demand, sometimes it is not feasible to do so.
+- Instead, we can approximate the derivative!
+- Remember that 
+$$f'(x)=\lim_{h\rightarrow 0}\frac{f(x+h)-f(x)}{h}$$.
+- So for a "small" $h>0$, 
+$$f'(x)\approx \frac{f(x+h)-f(x)}{h}$$
+- This is the "forward differencing" approach; we can also "backward difference"
+$$f'(x)\approx \frac{f(x)-f(x-h)}{h}$$
+- These works, but we can get a more accurate approximation for a fixed $h$.
+
+---
+# Approximating Derivatives (Cont.)
+
+- Instead of forward or backward differencing, we can center difference:
+$$f'(x)\approx \frac{f(x+h)-f(x-h)}{2h}$$
+- Instead of favoring one side, we are approximating the derivative equally around a "neighborhood" of $x$.
+- It is possible to show that the error generator by center differencing is smaller than right or left differencing.
+- There are even more accurate methods that a bit more computationally demanding.
+  - For those curious, look up Richardson's Extrapolation Method.
+
+---
+# Example
+
+Let's keep things simple and look at the derivative of $f(x)=x^2$. The analytical expression of the derivative is $f'(x) = 2x$.
+
+```{r}
+f            = function(x){x^2}        #make function f(x)
+fp           = function(x){2*x}        #make f'(x)
+xs           = seq(0,2,0.5)            #store x's
+h            = 0.01                    #store step size
+der          = fp(xs)                  #calc actual derivatives
+center_der   = (f(xs+h)-f(xs-h))/(2*h) #calc center differenced
+forward_der  = (f(xs+h)-f(xs))/(h)     #calc forward differenced
+backward_der = (f(xs)-f(xs-h))/(h)     #calc backwards differenced
+deriv_data   = data.table("f'(x)"=der,"Center"=center_der,
+                        "Foward"=forward_der,"Backward"=backward_der)
+deriv_data
+```
+
+
+---
+# Derivatives in Multiple Dimensions
+
+- If instead of $f(x)$, we have something like $f(x_1,x_2,...,x_n)$, not much changes.
+- The derivative will be a vector called the gradient denoted 
+
+$$\nabla_f = \Big(\frac{\partial f}{\partial x_1},...,\frac{\partial f}{\partial x_n}\Big)$$
+
+- To approximate each (partial) derivative, follow the same approach.
+- The partial derivative of $f$ in the $x_i$ dimension at $x = (x_1,...,x_n)$ is,
+
+$$\frac{\partial f}{\partial x_i} \approx \frac{f(x_1,...,x_i+h,...,x_n)-f(x_1,...,x_i-h,...,x_n)}{2h} $$
+- Do this for all inputs and then collect them in a vector.
+- This requires evaluating the function $2n$ times.
+
+---
+# Example
+
+Suppose that $f(x,y) = x^2 + \text{sin}(y)$. $\frac{\partial f}{\partial x} = 2x$ and $\frac{\partial f}{\partial y} = \text{cos}(y)$
+
+```{r}
+f            = function(x){x[1]^2+sin(x[2])}        #make function f(x)
+fp           = function(x){c(2*x[1],cos(x[2]))}     #make gradient of f(x)
+h            = 0.01                                 #store step size
+fp(c(1,0.5))
+c((f(c(1+h,0.5))-f(c(1-h,0.5)))/(2*h),(f(c(1,0.5+h))-f(c(1,0.5-h)))/(2*h))
+c((f(c(1+h,0.5))-f(c(1,0.5)))/h,(f(c(1,0.5+h))-f(c(1,0.5)))/h)
+c((f(c(1,0.5))-f(c(1-h,0.5)))/h,(f(c(1,0.5))-f(c(1,0.5-h)))/h)
+```
+
+---
+
+# Approximating Integrals
+
+- Just like derivatives, sometimes we might need to approximate an integral.
+- Unlike derivatives, sometimes integrals don't have a closed-form expression at all!
+- Therefore, all we can get for integrals is a numerical approximation.
+- Remember that 
+$$\int_{a}^{b}f(x)dx = \lim_{n\rightarrow \infty} \sum_{i=1}^{n}f(x_i) \Delta x$$ 
+- So for certain "partition" of points, $a\leq x_1 < x_2 < ...< x_n\leq b$ and $x_{i+1}-x_{i}=\Delta x = (b-a)/n$,
+
+$$\int_{a}^{b}f(x)dx \approx  \sum_{i=1}^{n}f(x_i) \Delta x$$ 
+
+- Note that a larger $n$ makes this more accurate but means $f$ must be evaluated $n$-times.
+- Also note that depending on if we include $a$ or $b$ as a point makes this an upper sum or a lower sum.
+  - Upper sums overestimate the integral.
+  - Lower sums underestimate the integral.
+  - Which to choose?
+---
+#Upper sums and lower sums
+
+![](pics/riemann-sums-area-distances.png)
+
+---
+# The Trapezoidal Rule
+
+- We don't need to pick upper or lower sums, we can use both! Sorta.
+- Instead of rectangles, we use trapezoids.
+
+```{r out.width = "75%",echo=F}
+knitr::include_graphics("pics/trapezoidal_rule.png")
+```
+
+---
+# The Trapezoidal Rule
+
+- Each of the trapezoids is $\frac{a+b}{2}h$
+- Here $h = \Delta x_i$, $a=f(x_{i-1})$, $b=f(x_{i})$, $\Delta x_i=x_{i}-x_{i-1}$.
+- So the area of each trapezoid is $\frac{f(x_{i-1})+f(x_{i1})}{2}\Delta x_i$
+- Therefore, we know
+
+$$\int_{a}^{b}f(x)dx \approx \sum_{i=1}^{n} \frac{f(x_{i-1})+f(x_{i})}{2}\Delta x_i$$
+- The above expression works for an arbitrary grid i.e. $\Delta x_i$ need not equal $\Delta x_{i+k}$
+- If the grid is uniform, the above becomes a simple expression:
+
+$$\sum_{i=1}^{n} \frac{f(x_{i-1})+f(x_{i})}{2}\Delta x_i = \frac{\Delta x}{2}(f(x_0)+2f(x_1)+...+2f(x_{n-1})+f(x_n))$$
+- This approximation is more accurate than the upper or lower sums.
+
+---
+# Example
+
+Suppose $f(x)=x^2$ and we want to evaluate $\int_{0}^{1.5}f(x)dx$.
+
+```{r}
+f            = function(x){x^2}        #make function f(x)
+Fx           = function(x){x^3/3}
+trap_rule = function(func,a,b,n=20){
+  dx = (b-a)/n
+  xs = seq(a,b,dx)
+  val = sum(2*func(xs[-c(1,n)]))
+  val = val + func(xs[1])+func(xs[n])
+  val*dx/2
+}
+true_val = Fx(1.5)-Fx(0)
+my_approx_val20 = trap_rule(f,0,1.5,n=20)
+my_approx_val100 = trap_rule(f,0,1.5,n=100)
+approx_val = integrate(f,0,1.5)[[1]]
+c(true_val,my_approx_val20,my_approx_val100,approx_val)
+```
+
+---
+# Multivariate Integration
+- Unlike derivatives, multidimensional integration becomes difficult quickly. 
+- One approach to multidimensional integration is actually Monte Carlo simulation, which we covered last lecture.
+- A large class of multidimensional integration needed for probability distributions can be evaluated using Markov Chain Monte Carlo (MCMC) techniques.
+ - Some examples include the Metropolis-Hastings algorithm and Gibbs Sampling.
+ - These are needed for Bayesian inference.
+ - Beyond the scope of this class, but worth looking into on your own.
+
+---
+# Solving for Roots
+
+- Many times you'll want to solve an equation numerically.
+  - This may because the closed-form solution is impossible or just tedious.
+- When this is, we say we want to find the roots (i.e. $x$ values) s.t. 
+$$f(x)=0$$
+- While we will cover the simplest methods to do so, the important thing to remember is the motivation and when you might want to use such techniques.
+  - Better programmers than you have programmed faster and more robust methods.
+- Dates back to the Babylonians and calculating square roots:
+
+$$\sqrt{a} = x$$
+or 
+$$x^2 - a = 0$$  
+---
+# Bisection Method
+
+- One of the two methods we will cover here is the bisection method.
+- While this method will always work, it can be slow.
+- In order to use the method, you must have starting values $a$ and $b$ where
+
+$$f(a) < 0 < f(b) \text{ or } f(a) > 0 > f(b)$$
+- The idea is we take the midpoint between $a$ and $b$, which we cal $c$.
+- If $\text{sign}(f(c))=\text{sign}(f(a))$, replace $a$ with $c$, otherwise $b$ with $c$.
+- Continue until $|f(c)|<\varepsilon$ where $\varepsilon$ is a tolerance value.
+
+---
+# Bisection Method
+
+```{r out.width = "50%",echo=F}
+knitr::include_graphics("pics/Bisection_method.png")
+```
+
+---
+# Reflection
+
+- The bisection method works, but it is slow and sorta fancy "guess and check."
+- We are only using the sign of the function to update the guesses.
+- If we could incorporate more information of the function into the search process, it might be faster.
+- Idea: Can we use the derivative of the function to tell us where to go next?
+- This is known as Newton's method and it was the first improvement 
+
+---
+# Newton's Method
+- Equation of tangent line in point-slope form at $x$:
+$$f(x) - f(x_n) = f'(x_n)(x-x_n)$$
+- Set $f(x)=0$, replace $x$ with $x_{n+1}$, and solve for $x$:
+$$x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}$$
+- So make an initial guess $x_0$, form $x_1 = x_0 - \frac{f(x_0)}{f'(x_0)}$.
+- Keep updating $x_{n+1}$ until $|f(x_{n+1})|<\varepsilon$
+- Question: What technique that we learned earlier will most likely be needed for this method?
+
+---
+# Comparing Methods
+
+```{r root_fun, echo = F}
+biscetion = function(f,a,b,eps=1e-14){
+  val_a = f(a)
+  val_b = f(b)
+  c_n = (a+b)/2
+  val_c = f(c_n)
+  n = 1
+  if(sign(a)==sign(b)){
+    stop("a and b have the same sign")
+  }
+  while(abs(val_c)>eps){
+    if(sign(val_c)==sign(val_a)){
+      a = c_n
+    }else{
+     b = c_n
+    }
+    c_n = (a+b)/2
+    val_a = f(a)
+    val_c = f(c_n)
+    n = n + 1
+  }
+  c(c_n,n)
+}
+
+Newtons = function(f,x,eps=1e-14,h=0.01){
+  xn = x
+  fp = (f(xn+h)-f(xn-h))/(2*h)
+  xnp1 = xn - f(xn)/fp
+  n = 1
+  while(abs(f(xnp1))>eps){
+    xn = xnp1
+    fp = (f(xn+h)-f(xn-h))/(2*h)
+    xnp1 = xn - f(xn)/fp
+    n = n + 1
+  }
+  c(xnp1,n)
+}
+```
+
+```{r comparing}
+f = function(x){x^2-2}
+bisect_results = biscetion(f,0,2)
+newton_results = Newtons(f,2)
+bisect_results
+newton_results
+```
+
+---
+# Fixed Points
+- Many times in economics, we are interested in finding a fixed point, which is defined as 
+$$f(x) = x$$
+or
+$$f(x) - x = 0$$
+- Example: Supply and Demand equlibirum can be written as
+$$P^S(Q^d(p)))=p$$
+- At it's core, there is nothing different for solving fixed points.
+ - Define $g(x) = f(x) - x$ and solve $g(x)=0$.
+- However, for some special functions, you can solve $f(x)=x$ via fixed point iteration.
+- If the function $f$ is a contraction, then we can simply iterate
+  - $x_1 = f(x_0)$
+  - $x_2 = f(x_1)$
+  - $x_{n+1} = f(x_n)$
+- What is a contraction?
+
+---
+# Contractions
+- Example: $f(x)=\text{cos}(x)$
+```{r}
+x0 = seq(0,2*pi,0.25)
+xn = x0
+for(n in 1:100){
+  xnp1 = cos(xn)
+  xn   = xnp1
+}
+xnp1
+```
+- Unfortunately, most functions are not contractions. 
+- However, there are some mathematical objects that are universally contractions and if you go onto graduate studies, you will experience them.
+ - Dynamic programming and value functions.
+ 
+---
+# Multivariate Root Finding
+- You might need to find 
+$$f_i (x_1,...,x_n) = 0 \text{ for } i = 1,...,n $$
+- There are methods similar to the ones we have already discussed for solving these problems.
+- However, they are much outside the scope of this class. 
+- For now, it is sufficient to know that there exists a package in `R` for solving these problems: `nleqslv`.
+- While the algorithms are more complex, the ideas remain the same.
+- You will need `nleqslv` for the problem set.
+ 
+---
+# Optimization
+- The last numerical methods topic that we will cover is optimization.
+- An optimization problem is one that can be written as follows:
+$$ \min_{x} f(x)$$
+- Note, if we want to maximize, that's the same as minimizing $-f(x)$.
+- We want to find the $x$ value that minimizes $f(x)$.
+- Sometimes, these will result in closed form solutions (e.g. OLS), but usually will be oto complicated.
+- We write the solution to this optimization problem as
+$$x^* = \text{arg}\min_{x} f(x)$$
+- For functions that are differentiable, they are optimized at $f'(x)=0$.
+  - Look familiar?
+- This is just root finding of $g(x)=0$ where $f'(x)=g(x)$.
+
+---
+# General Issues That Araise
+- The first big issue that arises is that maxs, mins, and saddle points all have $f'(x)=0$.
+- Also, there can be local minimums if the function is not globally convex.
+- This makes numerical optimization difficult!
+- Using the second derivative/Hessian matrix can help solve some of these issues, but it is very computationally expensive to compute.
+- As such, no one technique will always work.
+- Lots of time and research goes into figuring out the best way to optimize one specific optimization problem.
+ - E.g. check out this [best practices paper](https://chrisconlon.github.io/site/pyblp.pdf) for one model used in my subfield.
+- Sometimes an entire project can live or die depending upon if you can optimize the objective function correctly.
+ - E.g. one of my current projects...
+
+---
+# Grid Search
+
+- If the dimension of $x$ is small enough, you can make a grid of points to search on and see which set of values minimizes $f$.
+- While this seems simple, in practice, you rarely want to do it. 
+- If $x$ has more than two dimensions, must search many points.
+ - Particularly bad of $f$ takes awhile to run.
+- Must make grid fine enough so that you're not skipping over too many points, but too fine runs into the same problem as before.
+
+```{r}
+x1 = seq(0,5,0.05)
+x2 = seq(0,5,0.05)
+x3 = seq(0,5,0.05)
+nrow(expand.grid(x1,x2))
+nrow(expand.grid(x1,x2,x3))
+```
+---
+
+# Newton's Method... Again!
+
+- We can actually use Newton's Method to solve optimization problems.
+- Since we want to solve $f'(x) = 0$ and using $g(x)=f'(x)$, apply the formula from before:
+$$x_{n+1} = x_n - \frac{g(x_n)}{g'(x_n)}$$
+or
+$$x_{n+1} = x_n - \frac{f'(x_n)}{f''(x_n)}$$
+- Note that we must compute a derivative and a second derivative for each iteration.
+- Computing the derivative requires evaluating the function twice.
+- Computing the second derivative requires evaluating the function four times.
+- Generally, if you have $n$ inputs, you have to evaluate the function $4n^2/2$ times for the Hessian.
+- So while this works, if your objective function takes awhile to run or has a lot of inputs, it might not be ideal.
+ - Usually not ideal...
+
+---
+# Gradient Descent
+- All the second derivative does is scale the updating process so we don't "learn" too fast or too slow. 
+- Idea: Instead of calculating the scaling amount via the second derivative, we just set some paramter $\alpha>0$ to update
+$$x_{n+1} = x_n - \alpha f'(x_n)$$
+- This is the idea behind gradient descent. 
+- Choosing $\alpha$:
+ - Sometimes $\alpha$ is just fixed at some small value.
+ - However, you can also pick an optimal $\alpha$:
+ 1. Calculate $f'(x_n)$ and save it.
+ 2. Then choose $\alpha$ to minimize $f(x_n - \alpha f'(x_n))$.
+ 3. Repeat this step each time you update $x_{n+1}$.
+ - Whether this is beneficial is problem specific.
+ - You have to solve a smaller optimization problem during your larger optimization problem.
+ 
+---
+# Other Methods
+
+- There are other methods.
+ - Quasi-Newton: Calculate a function $B(x_n)$ that approximates the Hessian but is easier to calculate.
+ - Derivative free methods:
+ 1. Nelder-Mead
+ 2. Simulated annealing
+ 3. BOBYQA,COBYLA
+ 
+- Which method to choose?
+ - Problem specific!
+ - Depends on the properties of $f$, how long it takes $f$ to run, how many inputs $f$ has, etc.
+ - Unfortunately, there is no one answer.
+ - Optimization can make or break a project.
+
+---
+# Other Methods
+
+- Robustness: Performs well for various problems and starting values.
+- Efficiency: Achieves the solution relatively quickly.
+- Accuracy: Identify a solution with precision, not sensitive to starting values.
+
+---
+class: inverse, center, middle
+
+# Up Next: Data Wrangling
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+
+```{r gen_pdf, include = FALSE, cache = FALSE, eval = TRUE}
+infile = list.files(pattern = '.html')
+pagedown::chrome_print(input = infile, timeout = 100)
+```

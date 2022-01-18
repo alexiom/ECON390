@@ -1,0 +1,150 @@
+---
+title: "Data Science for Economists"
+# subtitle: "<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>"
+subtitle: "Lecture 10: Econ Applications of Numerical Methods"
+author: "Alex Marsh"
+date: "University of North Carolina | [ECON 390](https://github.com/alexiom/ECON390)" #"`r format(Sys.time(), '%d %B %Y')`"
+header-includes: 
+  - \usepackage{amsmath}
+output:
+  xaringan::moon_reader:
+    css: [default, metropolis, metropolis-fonts] 
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+
+---
+name: toc
+
+```{css, echo=FALSE}
+@media print {
+  .has-continuation {
+    display: block !important;
+  }
+}
+```
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+library(knitr)
+opts_chunk$set(
+  fig.align="center",  
+  fig.height=4, #fig.width=6,
+  # out.width="748px", #out.length="520.75px",
+  dpi=300, #fig.path='Figs/',
+  cache=F#, echo=F, warning=F, message=F
+  )
+library(data.table)
+library(ggplot2)
+```
+
+# Table of contents
+
+1. [Introduction](#introduction)
+
+2. [Linear Regression](#OLS)
+
+3. [Supply and Demand Oligopoly](#Berry)
+
+---
+class: inverse, center, middle
+name: introduction
+
+# Introduction
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+
+
+# Agenda
+
+Today will be an easy lecture that shows y'all some applications of the numerical methods we just learned.
+
+The actual lecture slides will be short as we will spend most of the day programming.
+
+---
+class: inverse, center, middle
+name: OLS
+
+# Linear Regression
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+---
+# Linear Regression
+
+- As you may have already seen, many times in economics, we have a dependent variable $(y_i)_{i=1}^{n}$ and indepedent variables $(x_{1i},x_{2i},...,x_{ki})_{i=1}^{n}$ that we would like to relate.
+- Specifically, we want to estimate $E[y_i | X_i]$ where $X_i = (x_{1i},x_{2i},...,x_{Ki})_{i=1}^{n}$.
+- We do this by assuming a "linear model" and estimating the equation of a line $$y_i = \alpha + \beta_1 x_{1i}+...+\beta_K x_{1k}+\varepsilon_i$$
+- $y_i$ and $X_i$ are data we observe; $\alpha$ and $(\beta_k)_{k=1}^{K}$ are parameters we would like to estimate.
+--
+
+- What's $\varepsilon_i$?
+
+--
+
+- Note: $\varepsilon_i = y_i - \alpha - \beta_1 x_{1i}-...-\beta_K x_{1k}$
+- Idea: we can estimate the parameters by choosing $\theta = (\alpha,\beta_1,...,\beta_K)$ such that we minimize $$\sum_{i=1}^{N} \varepsilon_i^2$$
+---
+# Linear Regression
+
+![](pics/linear_reg.png)
+---
+# Linear Regression
+
+- Notation: 
+ - For the true values of $\theta$, we say $\varepsilon_i$ is the unobserved error term.
+ - When we estimate the values of $\theta$, we typically put "hats" on them to indicate estimates $\hat{\theta}$. Likewise with the error term.
+ - We call $\hat{\varepsilon_i}$ the "residual"
+ - Error term is population; residual is sample.
+ 
+- So to estimate $\theta$, we would like to solve the problem $$\min_{\theta} \sum_{i=1}^{N}\hat{\varepsilon}_i (\theta)^2$$
+- Note: $\hat{\varepsilon}_i (\theta) = y_i -  \hat{\alpha}-\hat{\beta}_1 x_{1i}-...-\beta_K x_{1K}$
+- While this problem has a "closed-form" solution, we can use the numerical methods we talked about in last class.
+- Let's go to R!
+
+---
+class: inverse, center, middle
+name: Berry
+
+# Supply and Demand Oligopoly
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+# Demand: Oligopoly
+
+- I will be leaving a lot of details out.
+- Suppose we have $K$ products all produced by a different firm.
+- Suppose consumers get the following utility from product $k$: $$u_{ik} = \beta_0 + \beta_x x_k - \alpha p_k + \xi_k + \varepsilon_{ik}$$
+- We say consumers will select one of the $K$ products that maximizes their utility (with the option of not buying anything at all).
+- Without getting into details, we say that the market share for each product will have the following expression $$s_k = \frac{e^{u_k}}{1+\sum_{j=1}^{K}e^{u_j}}$$
+where $u_{k} = \beta_0 + \beta_x x_k - \alpha p_k + \xi_k$
+- We say the market share is the "demand."
+---
+# Supply: Oligopoly
+
+- On the supply side, we say firms set price to compete with each other to maximize profits:
+$$\max_{p} \pi_k(p) = s_k(p)p - s_k(p)c_k$$
+where $c_k$ is a constant marginal cost of production.
+- From a game theory model, we can derive an optimal price setting formula $$p_k = \frac{1}{\alpha (1-s_k(p_k))}+ c_k$$
+ - Reminder: in perfect competition $p_k = c_k$.
+- Note that the market share (demand) shows up in the pricing formula.
+- If we wanted to simulate this model, we would need to solve for equilibrium prices as demand depends on prices $s_k(p)$ and prices depend on demand $p_k (s)$. 
+- We need to solve a fixed point where $p_k(s_k(p^*)) = p^*$
+- To R for an example!
+
+---
+class: inverse, center, middle
+
+# Up Next: Data Wrangling
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+
+```{r gen_pdf, include = FALSE, cache = FALSE, eval = TRUE}
+infile = list.files(pattern = '.html')
+pagedown::chrome_print(input = infile, timeout = 100)
+```
